@@ -4,17 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Contact Form</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="../style.css">
 </head>
 <body>
     <nav>
         <div class="nav-container">
-            <div class="logo">FormHub</div>
+            <div class="logo">TCI</div>
             <ul class="nav-links">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#contact">Contact</a></li>
+                <li><a href="home.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="submission.html">Submission</a></li>
+                <li><a href="about.html">About</a></li>
             </ul>
+            <div class="nav-actions">
+                <a href="login.html" class="employee-login">Employee Login</a>
+            </div>
         </div>
     </nav>
 
@@ -86,15 +90,34 @@
                         <label>Date of Service/Experience</label>
                         <input type="date" name="review_date">
                     </div>
+
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input type="text" name="review_street" placeholder="Street">
+                        <input type="text" name="review_city" placeholder="City">
+                        <input type="text" name="review_state" placeholder="State">
+                        <input type="text" name="review_zip" placeholder="ZIP Code">
+                    </div>
                 </div>
+                
 
                 <!-- Project Proposal Form -->
                 <div id="proposalForm" class="form-section">
                     <h2 style="color: #667eea; margin-bottom: 1.5rem;">Project Proposal</h2>
                     
                     <div class="form-group">
-                        <label>Full Name <span class="required">*</span></label>
+                        <label>First Name <span class="required">*</span></label>
                         <input type="text" name="proposal_name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Last Name <span class="required">*</span></label>
+                        <input type="text" name="proposal_name" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Company Name</label>
+                        <input type="text" name="proposal_company">
                     </div>
 
                     <div class="form-group">
@@ -108,17 +131,15 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Company Name</label>
-                        <input type="text" name="proposal_company">
+                        <label>Address</label>
+                        <input type="text" name="review_street" placeholder="Street">
+                        <input type="text" name="review_city" placeholder="City">
+                        <input type="text" name="review_state" placeholder="State">
+                        <input type="text" name="review_zip" placeholder="ZIP Code">
                     </div>
 
                     <div class="form-group">
-                        <label>Project Title <span class="required">*</span></label>
-                        <input type="text" name="proposal_title" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Project Type <span class="required">*</span></label>
+                        <label>Contract Type <span class="required">*</span></label>
                         <select name="proposal_type" required>
                             <option value="">Select project type</option>
                             <option value="web-development">Web Development</option>
@@ -130,12 +151,17 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Project Description <span class="required">*</span></label>
-                        <textarea name="proposal_description" required placeholder="Describe your project in detail..."></textarea>
+                        <label>Desired Start Date</label>
+                        <input type="date" name="proposal_start_date">
                     </div>
 
                     <div class="form-group">
-                        <label>Budget Range</label>
+                        <label>Duration</label>
+                        <input type="text" name="proposal_timeline" placeholder="e.g., 3 months, By January 2026">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Contract Rate</label>
                         <select name="proposal_budget">
                             <option value="">Select budget range</option>
                             <option value="under-5k">Under $5,000</option>
@@ -147,18 +173,16 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Desired Start Date</label>
-                        <input type="date" name="proposal_start_date">
+                        <label>Project Description <span class="required">*</span></label>
+                        <textarea name="proposal_description" required placeholder="Describe your project in detail..."></textarea>
                     </div>
 
                     <div class="form-group">
-                        <label>Timeline/Deadline</label>
-                        <input type="text" name="proposal_timeline" placeholder="e.g., 3 months, By January 2026">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Additional Information</label>
-                        <textarea name="proposal_additional" placeholder="Any other details we should know..."></textarea>
+                        <label>Address</label>
+                        <input type="text" name="proposal_street" placeholder="Street">
+                        <input type="text" name="proposal_city" placeholder="City">
+                        <input type="text" name="proposal_state" placeholder="State">
+                        <input type="text" name="proposal_zip" placeholder="ZIP Code">
                     </div>
                 </div>
 
@@ -175,6 +199,6 @@
         <button class="popup-btn" onclick="closePopup()">Close</button>
     </div>
 
-    <script src="script.js"></script>
+    <script src="../script.js"></script>
 </body>
 </html>

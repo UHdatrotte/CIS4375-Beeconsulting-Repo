@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<title>Login — Simple Page</title>
+<link rel="stylesheet" href="/style.css">
+<style>
+
+body {
+font-family: Arial, sans-serif;
+background-color: #f4f4f9;
+margin: 0;
+padding: 0;
+display: flex;
+justify-content: center;
+align-items: center;
+height: 100vh;
+}
+.card {
+background: #fff;
+border-radius: 8px;
+box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+padding: 2rem;
+width: 100%;
+max-width: 400px;
+box-sizing: border-box;
+}
+h1 {
+font-size: 1.5rem;
+margin-bottom: 1rem;
+color: #333;
+text-align: center;
+}
+.lead {
+font-size: 1rem;
+margin-bottom: 1.5rem;
+color: #666;
+text-align: center;
+}
+.input {
+margin-bottom: 1rem;
+}
+
+.input input {
+width: 100%;
+padding: 0.75rem;
+border: 1px solid #ddd;
+border-radius: 4px;
+font-size: 1rem;
+box-sizing: border-box;
+}
+.row {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 1rem;
+}
+.btn {
+width: 100%;
+padding: 0.75rem;
+background-color: #667eea;
+color: #fff;
+border: none;
+border-radius: 4px;
+font-size: 1rem;
+cursor: pointer;
+transition: background-color 0.3s;
+}
+.btn:hover {
+background-color: #5a67d8;
+}
+footer {
+text-align: center;
+margin-top: 1rem;
+font-size: 0.9rem;
+color: #666;
+}
+footer a {
+color: #667eea;
+text-decoration: none;
+}
+footer a:hover {
+text-decoration: underline;
+
+}
+</style>
+</head>
+<body>
+<main class="card" role="main">
+<h1>Welcome</h1>
+<p class="lead">Sign in to your account with your username and
+password.</p>
+<!-- Connect this form to your backend using the action and
+method attributes -->
+<form id="loginForm" action="/api/login" method="POST"
+autocomplete="on" novalidate>
+<div>
+<label for="username">Username</label>
+<div class="input">
+<input id="username" name="username" type="text"
+placeholder="Username" required aria-required="true" />
+</div>
+</div>
+<div>
+<label for="password">Password</label>
+<div class="input">
+<input id="password" name="password" type="password"
+placeholder="Password" required aria-required="true" />
+</div>
+</div>
+<div class="row">
+
+<label style="display:flex;align-items:center;gap:8px;font-size:14px"><input id="remember" name="remember"
+type="checkbox" /> Remember me</label>
+<a href="#" class="muted" id="forgot">Forgot?</a>
+</div>
+<div>
+	<button class="btn" id="submitBtn" type="submit">Sign in</button>
+</div>
+</form>
+<footer>Don't have an account? <a href="#">Create one</a></footer>
+</main>
+</body>
+</html>
