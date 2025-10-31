@@ -2,5 +2,5 @@
 class Creds:
     conString = 'tci-db.cfq9j7itqlpd.us-east-1.rds.amazonaws.com'
     userName = 'admin'
-    password = 'password'
-    dbName = 'mydatabase'
+    password = 'B33consult!12'
+    dbName = 'TCI_database'

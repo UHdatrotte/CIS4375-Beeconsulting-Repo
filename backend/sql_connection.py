@@ -3,14 +3,14 @@
 import mysql.connector
 from mysql.connector import Error
 
-def create_connection(hostname, username, password, dbname):
+def create_connection(hostname, username, userpw, dbname):
     """Create a database connection to the MySQL database specified by the parameters."""
     connection = None
     try:
         connection = mysql.connector.connect(
             host=hostname,
             user=username,
-            passwd=password,
+            password=userpw,
             database=dbname
         )
         print("Connection to MySQL DB successful")
