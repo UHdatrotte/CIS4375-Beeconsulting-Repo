@@ -49,11 +49,26 @@
             color: #667eea;
         }
 
-        /* Container for right-side nav actions (login button, etc.) */
         .nav-actions {
             margin-left: auto;
             display: flex;
             align-items: center;
+        }
+
+        .nav-actions .nav-action-link {
+            margin-right: 0.75rem;
+            display: inline-block;
+            background-color: #000;
+            color: #fff;
+            text-decoration: none;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: 0.3s ease;
+        }
+
+        .nav-actions .nav-action-link:hover {
+            background-color: #333;
         }
 
         .container {
