@@ -94,3 +94,4 @@
         }
 
         overlay.addEventListener('click', closePopup);
+        

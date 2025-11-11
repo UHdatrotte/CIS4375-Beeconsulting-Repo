@@ -1,115 +1,202 @@
-# Backend team
-# This file contains the API endpoints for the backend of the application. 
-# It will handle all the requests from the frontend and return the appropriate responses.
+# app.py - Full backend with a SINGLE, CORRECT /api/submissions GET endpoint
 
+from flask import Flask, jsonify, request, send_from_directory, session
+from flask_cors import CORS
+from werkzeug.security import generate_password_hash, check_password_hash
+import os
+
+# --- These are your files, they are okay ---
+from sql_connection import create_connection, execute_read_query, execute_write_query
 import creds
-from sql_connection import create_connection
-import flask
-from flask import request, jsonify
 
-myCreds = creds.Creds() # Storing the credentials in a variable to use later for the database connection.
-connection = create_connection(myCreds.conString, myCreds.userName, myCreds.password, myCreds.dbName) # Establishing a connection to the database using the credentials stored in the variable.
+# ==================== DATABASE SETUP ====================
+myCreds = creds.Creds()
+connection = create_connection(myCreds.conString, myCreds.userName, myCreds.password, myCreds.dbName, charset='utf8mb4')
 
-# Setting up the Flask application
-app = flask.Flask(__name__)
+# ==================== FLASK APP SETUP ====================
+app = Flask(
+    __name__,
+    static_folder=os.path.join(os.path.dirname(__file__), '../frontend'),
+    static_url_path=''
+)
+CORS(app)
 app.config["DEBUG"] = True
+app.secret_key = 'a_new_secret_key_for_this_fresh_start_12345'
 
-# Endpoint for projects
 
-# This API will be called in the dashboard page of the frontend so admin can see all projects.
+# ==================== AUTHENTICATION ====================
+@app.route('/api/login', methods=['POST'])
+def login():
+    # ... your login code is fine ...
+    if not request.is_json:
+        return jsonify({'success': False, 'message': 'Request must be JSON'}), 400
+    data = request.get_json()
+    username = data.get('username', '').strip()
+    password = data.get('password', '').strip()
+    if not username or not password:
+        return jsonify({'success': False, 'message': 'Missing username or password'}), 400
+    sql = "SELECT ADMIN_ID, ADMIN_USER, ADMIN_PASS_HASH FROM ADMIN WHERE ADMIN_USER=%s"
+    user_record = execute_read_query(connection, sql, (username,))
+    if not user_record:
+        return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
+    stored_hash = user_record[0]['ADMIN_PASS_HASH'].strip()
+    if check_password_hash(stored_hash, password):
+        session['user'] = {'id': user_record[0]['ADMIN_ID'], 'username': user_record[0]['ADMIN_USER']}
+        return jsonify({'success': True, 'user': {'username': user_record[0]['ADMIN_USER']}})
+    else:
+        return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
+
+@app.route('/api/logout', methods=['POST'])
+def logout():
+    session.pop('user', None)
+    return jsonify({'success': True, 'message': 'Logged out successfully'})
+
+
+# ==================== PROTECTED DASHBOARD ====================
+@app.route('/api/dashboard', methods=['GET'])
+def dashboard():
+    # ... your dashboard code is fine ...
+    if 'user' not in session:
+        return jsonify({'error': 'Unauthorized access'}), 401
+    sql = "SELECT * FROM PROJECT"
+    projects = execute_read_query(connection, sql)
+    return jsonify({'projects': projects})
+
+
+# ==================== FRONTEND ROUTES ====================
+@app.route('/')
+def serve_home():
+    return send_from_directory(app.static_folder, 'home.html')
+
+@app.route('/dashboard.html')
+def serve_dashboard():
+    # ... your route code is fine ...
+    if 'user' not in session:
+        return send_from_directory(app.static_folder, 'home.html')
+    return send_from_directory(app.static_folder, 'dashboard.html')
+
+@app.route('/review.html')
+def serve_review():
+    return send_from_directory(app.static_folder, 'review.html')
+
+@app.route('/<path:filename>')
+def serve_static(filename):
+    if filename == 'dashboard.html' and 'user' not in session:
+        return send_from_directory(app.static_folder, 'home.html')
+    return send_from_directory(app.static_folder, filename)
+
+# ==================== PROJECT ENDPOINTS (CRUD) ====================
 @app.route('/api/project', methods=['GET'])
-def project_all(): # Return all projects
+def project_all():
+    # ... your project CRUD code is fine ...
+    sql = "SELECT * FROM PROJECT"
+    projects = execute_read_query(connection, sql)
+    return jsonify(projects)
+
+# ... (POST, PUT, DELETE for /api/project are fine) ...
+
+
+# ==================== TESTIMONIAL ENDPOINTS (CRUD) ====================
+@app.route('/api/testimonial', methods=['GET'])
+def testimonial_all():
+    # ... your testimonial CRUD code is fine ...
+    sql = "SELECT * FROM TESTIMONIAL"
+    testimonials = execute_read_query(connection, sql)
+    return jsonify(testimonials)
+
+# ... (POST, PUT, DELETE for /api/testimonial are fine) ...
+
+
+# ==================== PUBLIC SUBMISSIONS (THE CORRECTED SECTION) ====================
+
+# THIS IS THE ONLY FUNCTION FOR GETTING ALL SUBMISSIONS FOR THE DASHBOARD
+@app.route('/api/submissions', methods=['GET'])
+def get_all_submissions():
     cursor = connection.cursor(dictionary=True)
-
-    query = "SELECT * FROM PROJECT"
-    cursor.execute(query)
-    project = cursor.fetchall()
-    return jsonify(project)
-
-# This API will be called on the form submission page of the frontend
-@app.route('/api/project', methods=['POST'])
-def add_project(): # Adds a new project to the database.
-    request_data = request.get_json() # This is a payload that is sent from the frontend when a new project is created.
     
-    new_client_fname = request_data['CLIENT_FNAME']
-    new_client_lname = request_data['CLIENT_LNAME']
-    new_company_name = request_data['COMPANY_NAME']
-    new_client_email = request_data['CLIENT_EMAIL']
-    new_client_phone = request_data['CLIENT_PHONE']
-    new_company_street = request_data['COMPANY_STREET']
-    new_company_city = request_data['COMPANY_CITY']
-    new_company_state = request_data['COMPANY_STATE']
-    new_company_zip = request_data['COMPANY_ZIP']
-    new_contract_type = request_data['CONTRACT_TYPE']
-    new_start_date = request_data['START_DATE']
-    new_duration = request_data['DURATION']
-    new_contract_rate = request_data['CONTRACT_RATE']
-    new_position_req = request_data['POSITION_REQ']
-    new_job_street = request_data['JOB_STREET']
-    new_job_city = request_data['JOB_CITY']
-    new_job_state = request_data['JOB_STATE']
-    new_job_zip = request_data['JOB_ZIP']
-    new_marketing = request_data['MARKETING']
-
-    cursor = connection.cursor(dictionary=True)
-
-    query = f"""INSERT INTO PROJECT (CLIENT_FNAME, CLIENT_LNAME, COMPANY_NAME, CLIENT_EMAIL, CLIENT_PHONE, COMPANY_STREET, COMPANY_CITY, COMPANY_STATE, COMPANY_ZIP, CONTRACT_TYPE, START_DATE, DURATION, CONTRACT_RATE, POSITION_REQ, JOB_STREET, JOB_CITY, JOB_STATE, JOB_ZIP, MARKETING) 
-    VALUES ('{new_client_fname}', '{new_client_lname}', '{new_company_name}', '{new_client_email}', '{new_client_phone}', '{new_company_street}', '{new_company_city}', '{new_company_state}', '{new_company_zip}', '{new_contract_type}', '{new_start_date}', '{new_duration}', '{new_contract_rate}', '{new_position_req}', '{new_job_street}', '{new_job_city}', '{new_job_state}', '{new_job_zip}', '{new_marketing}')"""
-
-    cursor.execute(query)
-    return f"Project added successfully by {new_client_fname} {new_client_lname} from {new_company_name}"
-
-# This API will be called in the dashboard page of the frontend for the admin.
-@app.route('/api/project', methods=['PUT'])
-def update_project(): # Updates a current project in the database.
-    request_data = request.get_json() # Payload protected by the frontend.
+    # Testimonials - Select the new SUBMITTED_AT column
+    cursor.execute("""
+        SELECT 
+            TESTIMONIAL_ID AS id, CONCAT(FNAME,' ',LNAME) AS name, EMAIL AS email, 
+            COMPANY_NAME AS company, REVIEW AS message, SUBMITTED_AT AS dateSubmitted
+        FROM TESTIMONIAL
+    """)
+    testimonials = cursor.fetchall()
+    for t in testimonials:
+        t['type'] = 'review'
+        t['status'] = 'waiting'
     
-    idtoUpdate = request_data['PROJECT_ID'] # This is the ID of the project that needs to be updated.
-
-    new_client_fname = request_data['CLIENT_FNAME']
-    new_client_lname = request_data['CLIENT_LNAME']
-    new_company_name = request_data['COMPANY_NAME']
-    new_client_email = request_data['CLIENT_EMAIL']
-    new_client_phone = request_data['CLIENT_PHONE']
-    new_company_street = request_data['COMPANY_STREET']
-    new_company_city = request_data['COMPANY_CITY']
-    new_company_state = request_data['COMPANY_STATE']
-    new_company_zip = request_data['COMPANY_ZIP']
-    new_contract_type = request_data['CONTRACT_TYPE']
-    new_start_date = request_data['START_DATE']
-    new_duration = request_data['DURATION']
-    new_contract_rate = request_data['CONTRACT_RATE']
-    new_position_req = request_data['POSITION_REQ']
-    new_job_street = request_data['JOB_STREET']
-    new_job_city = request_data['JOB_CITY']
-    new_job_state = request_data['JOB_STATE']
-    new_job_zip = request_data['JOB_ZIP']
-    new_marketing = request_data['MARKETING']
-
-    cursor = connection.cursor(dictionary=True)
-
-    query = f"""UPDATE PROJECT SET CLIENT_FNAME = '{new_client_fname}', CLIENT_LNAME = '{new_client_lname}', COMPANY_NAME = '{new_company_name}', CLIENT_EMAIL = '{new_client_email}', CLIENT_PHONE = '{new_client_phone}', 
-    COMPANY_STREET = '{new_company_street}', COMPANY_CITY = '{new_company_city}', COMPANY_STATE = '{new_company_state}', COMPANY_ZIP = '{new_company_zip}',
-    CONTRACT_TYPE = '{new_contract_type}', START_DATE = '{new_start_date}', DURATION = '{new_duration}', CONTRACT_RATE = '{new_contract_rate}', POSITION_REQ = '{new_position_req}', 
-    JOB_STREET = '{new_job_street}', JOB_CITY = '{new_job_city}', JOB_STATE = '{new_job_state}', JOB_ZIP = '{new_job_zip}', MARKETING = '{new_marketing}' 
-    WHERE PROJECT_ID = {idtoUpdate}"""
-
-    cursor.execute(query)
-    return f"Project {idtoUpdate} has been updated successfully by TCI Admin"
-
-# This API will be called in the dashboard page of the frontend for the admin.
-# Note: Make sure the project is deleted from other tables first! Will come back to this later...
-"""@app.route('/api/project', methods=['DELETE']) # Deletes a current project stored in the database.
-def delete_project():
-    request_data = request.get_json() # Payload protected by the frontend.
+    # Projects - Select the new SUBMITTED_AT column
+    cursor.execute("""
+        SELECT 
+            PROJECT_ID AS id, CONCAT(CLIENT_FNAME,' ',CLIENT_LNAME) AS name, CLIENT_EMAIL AS email, 
+            COMPANY_NAME AS company, POSITION_REQ AS title, CONTRACT_TYPE AS projectType, 
+            PROJECT_DESCRIPTION AS description, CONTRACT_RATE AS budget, START_DATE AS startDate, 
+            DURATION AS timeline, SUBMITTED_AT AS dateSubmitted
+        FROM PROJECT
+    """)
+    projects = cursor.fetchall()
+    for p in projects:
+        p['type'] = 'proposal'
+        p['status'] = 'waiting'
     
-    idtoDelete = request_data['PROJECT_ID'] # This is the ID of the project that needs to be deleted.
+    return jsonify(testimonials + projects)
 
-    cursor = connection.cursor(dictionary=True)
+# THIS IS THE ONLY FUNCTION FOR ADDING NEW SUBMISSIONS
+@app.route('/api/submissions', methods=['POST'])
+def add_submission():
+    data = request.get_json()
+    submission_type = data.get('type')
+    try:
+        if submission_type == 'review':
+            # --- FIX IS HERE ---
+            # Match the keys sent from the frontend JavaScript exactly.
+            keys = ['FNAME', 'LNAME', 'COMPANY_NAME', 'EMAIL', 'REVIEW', 'RATING']
+            values = [
+                data.get('FNAME'),          # Changed from 'firstname'
+                data.get('LNAME'),          # Changed from 'lastname'
+                data.get('COMPANY_NAME'),   # Changed from 'company'
+                data.get('EMAIL'),          # Changed from 'email'
+                data.get('REVIEW'),         # Changed from 'message'
+                data.get('RATING')          # Changed from 'rating'
+            ]
+            
+            # Check if any required fields are missing
+            if not all([data.get('FNAME'), data.get('LNAME'), data.get('EMAIL'), data.get('REVIEW'), data.get('RATING')]):
+                return jsonify({'success': False, 'message': 'Missing required fields'}), 400
 
-    query = f"DELETE FROM PROJECT WHERE PROJECT_ID = {idtoDelete}"
+            sql = f"INSERT INTO TESTIMONIAL ({','.join(keys)}) VALUES ({','.join(['%s']*len(keys))})"
+            testimonial_id = execute_write_query(connection, sql, tuple(values))
+            return jsonify({'success': True, 'message': 'Review submitted successfully', 'id': testimonial_id})
 
-    cursor.execute(query)
-    return f"Project {idtoDelete} has been deleted successfully by TCI Admin"
-"""
-app.run()
+        elif submission_type == 'proposal':
+            # (Your proposal logic seems okay, but double-check its keys as well)
+            keys = [
+                'CLIENT_FNAME', 'CLIENT_LNAME', 'COMPANY_NAME', 'CLIENT_EMAIL', 'CLIENT_PHONE',
+                'COMPANY_STREET', 'COMPANY_CITY', 'COMPANY_STATE', 'COMPANY_ZIP', 'POSITION_REQ',
+                'JOB_STREET', 'JOB_CITY', 'JOB_STATE', 'JOB_ZIP', 'CONTRACT_TYPE', 'START_DATE',
+                'DURATION', 'CONTRACT_RATE', 'MARKETING', 'PROJECT_DESCRIPTION'
+            ]
+            values = [
+                data.get('proposal_firstname'), data.get('proposal_lastname'), data.get('proposal_company'),
+                data.get('proposal_email'), data.get('proposal_phone'), data.get('proposal_company_street'),
+                data.get('proposal_company_city'), data.get('proposal_company_state'), data.get('proposal_company_zip'),
+                data.get('proposal_position'), data.get('proposal_street'), data.get('proposal_city'),
+                data.get('proposal_state'), data.get('proposal_zip'), data.get('proposal_type'),
+                data.get('proposal_start_date'), data.get('proposal_timeline'), data.get('proposal_budget'),
+                data.get('proposal_marketing'), data.get('proposal_description')
+            ]
+            sql = f"INSERT INTO PROJECT ({','.join(keys)}) VALUES ({','.join(['%s']*len(keys))})"
+            project_id = execute_write_query(connection, sql, tuple(values))
+            return jsonify({'success': True, 'message': 'Proposal submitted successfully', 'id': project_id})
+        else:
+            return jsonify({'success': False, 'message': 'Invalid submission type'}), 400
+    except Exception as e:
+        print(f"Error in add_submission: {e}")
+        return jsonify({'success': False, 'message': 'An internal server error occurred'}), 500
+# ... (Your Approve / Deny submission routes are fine) ...
+
+
+# ==================== RUN APPLICATION ====================
+if __name__ == '__main__':
+    app.run(debug=True, port=5000)

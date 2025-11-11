@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Review - FormHub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">TCI</div>
+            <ul class="nav-links">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="submission.html" class="nav-action-link">Submission</a>
+                <a href="login.html" class="employee-login">Employee Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-card">
+            <h1>Submit Your Review</h1>
+            <p class="subtitle">Share your experience with us</p>
+
+            <!-- A simple, single form for reviews -->
+            <form id="reviewForm">
+                <div class="form-group">
+                    <label for="name">First Name <span class="required">*</span></label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                 <div class="form-group">
+                    <label for="lastname">Last Name <span class="required">*</span></label>
+                    <input type="text" id="lastname" name="lastname" required>
+                </div>
+                <div class="form-group">
+                    <label for="company">Company/Organization</label>
+                    <input type="text" id="company" name="company">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email <span class="required">*</span></label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label for="message">Your Review <span class="required">*</span></label>
+                    <textarea id="message" name="message" required placeholder="Share your experience with us..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Rating <span class="required">*</span></label>
+                    <div class="rating-group">
+                        <input type="radio" name="rating" id="star5" value="5" required><label for="star5">★</label>
+                        <input type="radio" name="rating" id="star4" value="4"><label for="star4">★</label>
+                        <input type="radio" name="rating" id="star3" value="3"><label for="star3">★</label>
+                        <input type="radio" name="rating" id="star2" value="2"><label for="star2">★</label>
+                        <input type="radio" name="rating" id="star1" value="1"><label for="star1">★</label>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn">Submit Review</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- POPUP HTML -->
+    <div class="overlay" id="overlay"></div>
+    <div class="popup" id="popup">
+        <div class="popup-icon">✓</div>
+        <h2>Review Submitted!</h2>
+        <p>Thank you for your review. We'll review it and publish it shortly.</p>
+        <button class="popup-btn" onclick="closePopup()">Close</button>
+    </div>
+
+    <!-- Use the dedicated script for reviews -->
+    <script src="review-script.js"></script>
+
+</body>
+</html>

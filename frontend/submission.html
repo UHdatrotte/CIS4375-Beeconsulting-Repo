@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit - FormHub</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .form-section { display: none; }
+        .form-section.active { display: block; }
+        .type-option.active { background-color: #007bff; color: white; }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">TCI</div>
+            <ul class="nav-links">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="submission.html" class="nav-action-link">Submission</a>
+                <a href="login.html" class="employee-login">Employee Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-card">
+            <!-- THE SINGLE, MAIN FORM FOR THE ENTIRE PAGE -->
+            <form id="mainForm" novalidate>
+                
+                <h1>Select Submission Type</h1>
+                <div class="type-selector">
+                    <button type="button" class="type-option" id="selectReviewBtn">Submit a Review</button>
+                    <button type="button" class="type-option" id="selectProposalBtn">Request a Proposal</button> 
+                </div>
+                <hr>
+
+                <!-- SECTION 1: REVIEW FORM (as a DIV) -->
+                <div id="reviewFormSection" class="form-section">
+                    <h2>Submit Your Review</h2>
+                    <div class="form-group">
+                        <label for="review_name">First Name <span class="required">*</span></label>
+                        <input type="text" id="review_name" name="review_name">
+                    </div>
+                    <div class="form-group">
+                        <label for="review_lastname">Last Name <span class="required">*</span></label>
+                        <input type="text" id="review_lastname" name="review_lastname">
+                    </div>
+                    <div class="form-group">
+                        <label for="review_company">Company/Organization</label>
+                        <input type="text" id="review_company" name="review_company">
+                    </div>
+                    <div class="form-group">
+                        <label for="review_email">Email <span class="required">*</span></label>
+                        <input type="email" id="review_email" name="review_email">
+                    </div>
+                    <div class="form-group">
+                        <label for="review_message">Your Review <span class="required">*</span></label>
+                        <textarea id="review_message" name="review_message" placeholder="Share your experience with us..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Rating <span class="required">*</span></label>
+                        <div class="rating-group">
+                            <input type="radio" name="review_rating" id="star5_sub" value="5"><label for="star5_sub">★</label>
+                            <input type="radio" name="review_rating" id="star4_sub" value="4"><label for="star4_sub">★</label>
+                            <input type="radio" name="review_rating" id="star3_sub" value="3"><label for="star3_sub">★</label>
+                            <input type="radio" name="review_rating" id="star2_sub" value="2"><label for="star2_sub">★</label>
+                            <input type="radio" name="review_rating" id="star1_sub" value="1"><label for="star1_sub">★</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION 2: PROPOSAL FORM (as a DIV) -->
+                <div id="proposalFormSection" class="form-section">
+                    <h2 style="color: #667eea; margin-bottom: 1.5rem;">Project Proposal</h2>
+                    <div class="form-group">
+                        <label for="proposal_firstname">First Name <span class="required">*</span></label>
+                        <input type="text" id="proposal_firstname" name="proposal_firstname">
+                    </div>
+                    <div class="form-group">
+                        <label for="proposal_lastname">Last Name <span class="required">*</span></label>
+                        <input type="text" id="proposal_lastname" name="proposal_lastname">
+                    </div>
+                    <div class="form-group">
+                        <label for="proposal_company">Company Name</label>
+                        <input type="text" id="proposal_company" name="proposal_company">
+                    </div>
+                    <div class="form-group">
+                        <label>Company Address (Optional)</label>
+                        <input type="text" name="proposal_company_street" placeholder="Street">
+                        <input type="text" name="proposal_company_city" placeholder="City">
+                        <input type="text" name="proposal_company_state" placeholder="State">
+                        <input type="text" name="proposal_company_zip" placeholder="ZIP Code">
+                    </div>
+                    <div class="form-group">
+                        <label for="proposal_email">Email Address <span class="required">*</span></label>
+                        <input type="email" id="proposal_email" name="proposal_email">
+                    </div>
+                    <div class="form-group">
+                        <label for="proposal_phone">Phone Number <span class="required">*</span></label>
+                        <input type="tel" id="proposal_phone" name="proposal_phone">
+                    </div>
+                    <div class="form-group">
+                        <label for="proposal_position">Position Requested</label>
+                        <input type="text" id="proposal_position" name="proposal_position">
+                    </div>
+                    <div class="form-group">
+                        <label>Job Address</label>
+                        <input type="text" name="proposal_street" placeholder="Street">
+                        <input type="text" name="proposal_city" placeholder="City">
+                        <input type="text" name="proposal_state" placeholder="State">
+                        <input type="text" name="proposal_zip" placeholder="ZIP Code">
+                    </div>
+                    <div class="form-group">
+                        <label for="proposal_type">Contract Type <span class="required">*</span></label>
+                        <select id="proposal_type" name="proposal_type">
+                            <option value="">Select project type</option>
+                            <option value="web-development">Web Development</option>
+                            <option value="mobile-app">Mobile App</option>
+                            <option value="design">Design</option>
+                            <option value="consulting">Consulting</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="proposal_start_date">Desired Start Date</label>
+                        <input type="date" id="proposal_start_date" name="proposal_start_date">
+                    </div>
+                    <div class="form-group">
+                        <label for="proposal_timeline">Duration</label>
+                        <input type="text" id="proposal_timeline" name="proposal_timeline" placeholder="e.g., 3 months">
+                    </div>
+                    <div class="form-group">
+                        <label for="proposal_budget">Contract Rate</label>
+                        <select id="proposal_budget" name="proposal_budget">
+                            <option value="">Select budget range</option>
+                            <option value="under-5k">Under $5,000</option>
+                            <option value="5k-10k">$5,000 - $10,000</option>
+                            <option value="over-50k">Over $50,000</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="proposal_description">Project Description <span class="required">*</span></label>
+                        <textarea id="proposal_description" name="proposal_description" placeholder="Provide a detailed description..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="proposal_marketing">Marketing Details</label>
+                        <textarea id="proposal_marketing" name="proposal_marketing" placeholder="Enter any marketing info..."></textarea>
+                    </div>
+                </div>
+
+                <!-- The single, shared button for BOTH forms -->
+                <button type="submit" class="submit-btn" disabled>Select a form type to continue</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- POPUP HTML -->
+    <div class="overlay" id="overlay"></div>
+    <div class="popup" id="popup">
+        <div class="popup-icon">✓</div>
+        <h2>Form Submitted!</h2>
+        <p>Thank you for your submission. We'll review it shortly.</p>
+        <button class="popup-btn" id="closePopupBtn">Close</button>
+    </div>
+
+    <script src="submission.js"></script>
+</body>
+</html>

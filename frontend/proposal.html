@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Proposal - FormHub</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <!-- Your navigation bar -->
+        <div class="nav-container">
+            <div class="logo">TCI</div>
+            <ul class="nav-links">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+            <div class="nav-actions">
+                <a href="submission.html" class="nav-action-link">Submission</a>
+                <a href="login.html" class="employee-login">Employee Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="form-card">
+            <h1>Project Proposal</h1>
+            <p class="subtitle">Submit your client project details</p>
+
+            <form id="proposalForm">
+                <div class="form-group">
+                    <label for="proposal_firstname">First Name <span class="required">*</span></label>
+                    <input type="text" id="proposal_firstname" name="proposal_firstname" required>
+                </div>
+                <div class="form-group">
+                    <label for="proposal_lastname">Last Name <span class="required">*</span></label>
+                    <input type="text" id="proposal_lastname" name="proposal_lastname" required>
+                </div>
+                <div class="form-group">
+                    <label for="proposal_company">Company Name</label>
+                    <input type="text" id="proposal_company" name="proposal_company">
+                </div>
+                <div class="form-group">
+                    <label>Company Address (Optional)</label>
+                    <input type="text" name="proposal_company_street" placeholder="Street">
+                    <input type="text" name="proposal_company_city" placeholder="City">
+                    <input type="text" name="proposal_company_state" placeholder="State">
+                    <input type="text" name="proposal_company_zip" placeholder="ZIP Code">
+                </div>
+                <div class="form-group">
+                    <label for="proposal_email">Email Address <span class="required">*</span></label>
+                    <input type="email" id="proposal_email" name="proposal_email" required>
+                </div>
+                <div class="form-group">
+                    <label for="proposal_phone">Phone Number <span class="required">*</span></label>
+                    <input type="tel" id="proposal_phone" name="proposal_phone" required>
+                </div>
+                <div class="form-group">
+                    <label for="proposal_position">Position Requested</label>
+                    <!-- NOTE: name="proposal_position" -->
+                    <input type="text" id="proposal_position" name="proposal_position">
+                </div>
+                <div class="form-group">
+                    <label>Job Address</label>
+                    <!-- NOTE: name="proposal_street", etc. -->
+                    <input type="text" name="proposal_street" placeholder="Street">
+                    <input type="text" name="proposal_city" placeholder="City">
+                    <input type="text" name="proposal_state" placeholder="State">
+                    <input type="text" name="proposal_zip" placeholder="ZIP Code">
+                </div>
+                <div class="form-group">
+                    <label for="proposal_type">Contract Type <span class="required">*</span></label>
+                    <select id="proposal_type" name="proposal_type" required>
+                        <option value="">Select project type</option>
+                        <option value="web-development">Web Development</option>
+                        <option value="mobile-app">Mobile App</option>
+                        <option value="design">Design</option>
+                        <option value="consulting">Consulting</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="proposal_start_date">Desired Start Date</label>
+                    <!-- NOTE: name="proposal_start_date" -->
+                    <input type="date" id="proposal_start_date" name="proposal_start_date">
+                </div>
+                <div class="form-group">
+                    <label for="proposal_timeline">Duration</label>
+                    <!-- NOTE: name="proposal_timeline" -->
+                    <input type="text" id="proposal_timeline" name="proposal_timeline" placeholder="e.g., 3 months">
+                </div>
+                <div class="form-group">
+                    <label for="proposal_budget">Contract Rate</label>
+                    <!-- NOTE: name="proposal_budget" -->
+                    <select id="proposal_budget" name="proposal_budget" required>
+                        <option value="">Select budget range</option>
+                        <option value="under-5k">Under $5,000</option>
+                        <option value="5k-10k">$5,000 - $10,000</option>
+                        <option value="over-50k">Over $50,000</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="proposal_marketing">Marketing Details</label>
+                    <!-- NOTE: name="proposal_marketing" -->
+                    <textarea id="proposal_marketing" name="proposal_marketing" placeholder="Enter any marketing info..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="proposal_description">Project Description <span class="required">*</span></label>
+                    <textarea id="proposal_description" name="proposal_description" required placeholder="Provide a detailed description..."></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">Submit Proposal</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- POPUP HTML -->
+    <div class="overlay" id="overlay"></div>
+    <div class="popup" id="popup">
+        <div class="popup-icon">✓</div>
+        <h2>Proposal Submitted!</h2>
+        <p>Thank you for your submission. We'll review it shortly.</p>
+        <!-- NOTE: Switched to onclick for simplicity and robustness -->
+        <button class="popup-btn" onclick="closePopup()">Close</button>
+    </div>
+
+    <!-- SCRIPT FOR THIS PAGE ONLY -->
+    <script src="proposal.js"></script>
+
+</body>
+</html>

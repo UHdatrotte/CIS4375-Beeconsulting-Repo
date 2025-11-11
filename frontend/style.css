@@ -116,7 +116,7 @@
             transform: translateY(-2px);
         }
 
-        .type-option.active {
+        .type-option.selected {
             border-color: #667eea;
             background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
         }
@@ -477,4 +477,185 @@
     .about-page .contact-box {
         padding: 1rem;
     }
-}       
+} 
+
+/* ========== DASHBOARD PAGE STYLES ========== */
+/* --- General Page Body --- */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f7f6;
+    margin: 0;
+    padding-top: 80px; /* Space for the fixed nav */
+}
+
+/* --- Navigation (Assuming you have this already) --- */
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+.nav-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: 60px;
+}
+/* ... your other nav styles ... */
+
+
+/* --- Main Container and Form Card --- */
+.container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+}
+
+.form-card {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.form-card h1, .form-card h2 {
+    text-align: center;
+    color: #333;
+}
+
+.form-card h1 {
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.form-card h2 {
+    margin-top: 30px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+.form-card hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 30px 0;
+}
+
+
+/* --- NEW: Form Type Selector --- */
+.type-selector {
+    display: flex;
+    justify-content: center;
+    gap: 15px; /* Adds space between the buttons */
+    margin-bottom: 20px;
+}
+
+.type-option {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    border: 2px solid #ddd;
+    background-color: #f9f9f9;
+    color: #555;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.type-option:hover {
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.type-option.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+
+/* --- CORRECTED: General Form Element Styles --- */
+/* This now targets elements inside the #mainForm */
+#mainForm .form-group {
+    margin-bottom: 20px;
+}
+
+#mainForm label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #555;
+}
+
+#mainForm .required {
+    color: #e74c3c;
+    margin-left: 4px;
+}
+
+#mainForm input[type="text"],
+#mainForm input[type="email"],
+#mainForm input[type="tel"],
+#mainForm input[type="date"],
+#mainForm textarea,
+#mainForm select {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box; /* Important for padding and width */
+    transition: border-color 0.3s ease;
+}
+
+#mainForm input:focus,
+#mainForm textarea:focus,
+#mainForm select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+}
+
+#mainForm textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+
+/* --- NEW: Submit Button Styling (Including Disabled State) --- */
+.submit-btn {
+    width: 100%;
+    padding: 15px;
+    font-size: 18px;
+    font-weight: 600;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-top: 20px;
+}
+
+.submit-btn:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+.submit-btn:disabled {
+    background-color: #a0a0a0;
+    cursor: not-allowed;
+}
+
+
+/* --- Hiding/Showing the Form Sections --- */
+.form-section {
+    display: none;
+}
+.form-section.active {
+    display: block;
+}

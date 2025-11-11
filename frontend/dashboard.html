@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employee Dashboard</title>
+    <style>
+        /* ... your existing CSS unchanged ... */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+        nav {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+            align-items: center;
+            margin-left: 2.5rem;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        .nav-links a:hover {
+            color: #667eea;
+        }
+        .nav-actions {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+        }
+        .employee-login {
+            background-color: #000;
+            color: #fff;
+            text-decoration: none;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: 0.3s ease;
+        }
+        .employee-login:hover {
+            background-color: #333;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        .welcome-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+        .welcome-section h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        .dashboard-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .stat-card:nth-child(1) .stat-icon {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .stat-card:nth-child(2) .stat-icon {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        .stat-card:nth-child(3) .stat-icon {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+        .submissions-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .section-header h2 {
+            color: #333;
+            font-size: 1.5rem;
+        }
+        .filter-controls {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        .search-box, .filter-select {
+            padding: 0.5rem 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        .search-box {
+            width: 250px;
+        }
+        .search-box:focus, .filter-select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        .filter-select {
+            cursor: pointer;
+        }
+        .submissions-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .submissions-table thead {
+            background: #f8f9fa;
+        }
+        .submissions-table th {
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .submissions-table td {
+            padding: 1rem;
+            border-bottom: 1px solid #e0e0e0;
+            color: #666;
+        }
+        .submissions-table tbody tr {
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+        .submissions-table tbody tr:hover {
+            background: #f8f9fa;
+        }
+        .status-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        .status-waiting {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+        .status-approved {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+        .status-denied {
+            background: #ffebee;
+            color: #d32f2f;
+        }
+        .type-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        .action-btn {
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+        .action-btn:hover {
+            transform: scale(1.05);
+        }
+        /* Modal Popup Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2.5rem;
+            max-width: 700px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            animation: slideIn 0.3s ease-out;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e0e0e0;
+        }
+        .modal-title {
+            font-size: 1.5rem;
+            color: #333;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: #999;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .close-btn:hover {
+            color: #333;
+        }
+        .detail-group {
+            margin-bottom: 1.5rem;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+        .detail-value {
+            color: #666;
+            line-height: 1.6;
+        }
+        .rating-display {
+            color: #ffc107;
+            font-size: 1.5rem;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid #e0e0e0;
+        }
+        .approve-btn, .deny-btn {
+            flex: 1;
+            padding: 0.875rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .approve-btn { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; }
+        .deny-btn { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+        .approve-btn:hover, .deny-btn:hover { transform: translateY(-2px); }
+        .approve-btn:disabled, .deny-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .status-message { padding: 1rem; border-radius: 10px; margin-top: 1rem; font-weight: 500; }
+        .status-message.approved { background: #e8f5e9; color: #388e3c; }
+        .status-message.denied { background: #ffebee; color: #d32f2f; }
+        @media (max-width: 768px) {
+            .nav-links { gap: 1rem; font-size: 0.9rem; }
+            .dashboard-stats { grid-template-columns: 1fr; }
+            .filter-controls { width: 100%; }
+            .search-box { width: 100%; }
+            .submissions-table { font-size: 0.85rem; }
+            .submissions-table th, .submissions-table td { padding: 0.75rem 0.5rem; }
+            .modal-content { padding: 1.5rem; }
+            .modal-actions { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <div class="logo">TCI</div>
+            <ul class="nav-links">
+                <li><a href="home.html">Home</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="about.html">About</a></li>
+            </ul>
+            <div class="nav-actions">
+<!-- THE CORRECT HTML -->
+            <button id="logoutButton" class="employee-login">Logout</button>      
+        </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="welcome-section">
+            <h1>Welcome back, Employee!</h1>
+            <p>Review and manage form submissions</p>
+        </div>
+
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-label">Waiting for Review</div>
+                <div class="stat-value" id="waitingCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✓</div>
+                <div class="stat-label">Approved</div>
+                <div class="stat-value" id="approvedCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✕</div>
+                <div class="stat-label">Denied</div>
+                <div class="stat-value" id="deniedCount">0</div>
+            </div>
+        </div>
+
+        <div class="submissions-section">
+            <div class="section-header">
+                <h2>All Submissions</h2>
+                <div class="filter-controls">
+                    <input type="text" class="search-box" placeholder="Search by name, email..." id="searchBox">
+                    <select class="filter-select" id="typeFilter">
+                        <option value="all">All Types</option>
+                        <option value="review">Reviews</option>
+                        <option value="proposal">Proposals</option>
+                    </select>
+                    <select class="filter-select" id="statusFilter">
+                        <option value="all">All Status</option>
+                        <option value="waiting">Waiting</option>
+                        <option value="approved">Approved</option>
+                        <option value="denied">Denied</option>
+                    </select>
+                </div>
+            </div>
+
+            <table class="submissions-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Date Submitted</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="submissionsBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal" id="viewModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modalTitle">Submission Details</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modalBody"></div>
+            <div class="modal-actions" id="modalActions"></div>
+        </div>
+    </div>
+
+    <script>
+    // --- ELEMENT SELECTORS ---
+    const searchBox = document.getElementById('searchBox');
+    const typeFilter = document.getElementById('typeFilter');
+    const statusFilter = document.getElementById('statusFilter');
+    const submissionsBody = document.getElementById('submissionsBody');
+    const modal = document.getElementById('viewModal');
+    const logoutButton = document.getElementById('logoutButton');
+
+    let allSubmissions = []; // This will store the master list of submissions
+
+    // --- DATA FETCHING ---
+    async function fetchSubmissions() {
+        try {
+            // FIX: Fetch from the unified /api/submissions endpoint
+            const response = await fetch('/api/submissions');
+            if (!response.ok) throw new Error('Network response was not ok');
+            
+            let data = await response.json();
+
+            // Clean and map the data into a consistent format
+            allSubmissions = data.map(item => ({
+                id: item.id,
+                name: item.name || 'N/A',
+                email: item.email || 'N/A',
+                type: item.type,
+                // FIX: Use the correct 'dateSubmitted' field from the backend
+                date: item.dateSubmitted || new Date().toISOString(),
+                status: item.status || 'waiting',
+                // Keep the full original item for the modal view
+                fullData: item 
+            }));
+
+            updateStats();
+            renderSubmissions(allSubmissions);
+        } catch (error) {
+            console.error('Error fetching submissions:', error);
+            submissionsBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem;">Failed to load submissions.</td></tr>`;
+        }
+    }
+
+    // --- UI RENDERING ---
+    function updateStats() {
+        const waiting = allSubmissions.filter(s => s.status === 'waiting').length;
+        const approved = allSubmissions.filter(s => s.status === 'approved').length;
+        const denied = allSubmissions.filter(s => s.status === 'denied').length;
+
+        document.getElementById('waitingCount').textContent = waiting;
+        document.getElementById('approvedCount').textContent = approved;
+        document.getElementById('deniedCount').textContent = denied;
+    }
+
+    function renderSubmissions(data) {
+        if (!data || data.length === 0) {
+            submissionsBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:2rem;">No submissions found</td></tr>`;
+            return;
+        }
+
+        submissionsBody.innerHTML = data.map(sub => {
+            const statusClass = `status-${sub.status}`;
+            const statusText = sub.status.charAt(0).toUpperCase() + sub.status.slice(1);
+            const typeText = sub.type.charAt(0).toUpperCase() + sub.type.slice(1);
+            
+            // Format the date correctly for display
+            const displayDate = new Date(sub.date).toLocaleDateString("en-US", {
+                year: 'numeric', month: 'short', day: 'numeric'
+            });
+
+            return `
+                <tr onclick="viewSubmission(${sub.id}, '${sub.type}')">
+                    <td>#${sub.id}</td>
+                    <td>${sub.name}</td>
+                    <td><span class="type-badge">${typeText}</span></td>
+                    <td>${displayDate}</td>
+                    <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                    <td><button class="action-btn" onclick="event.stopPropagation(); viewSubmission(${sub.id}, '${sub.type}')">View</button></td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    // --- FILTERING ---
+    function filterSubmissions() {
+        const searchTerm = searchBox.value.toLowerCase();
+        const typeValue = typeFilter.value;
+        const statusValue = statusFilter.value;
+
+        const filtered = allSubmissions.filter(sub => {
+            const matchesSearch = sub.name.toLowerCase().includes(searchTerm) || sub.email.toLowerCase().includes(searchTerm);
+            const matchesType = typeValue === 'all' || sub.type === typeValue;
+            const matchesStatus = statusValue === 'all' || sub.status === statusValue;
+            return matchesSearch && matchesType && matchesStatus;
+        });
+        renderSubmissions(filtered);
+    }
+
+    // --- MODAL & ACTIONS ---
+    function viewSubmission(id, type) {
+        const sub = allSubmissions.find(s => s.id === id && s.type === type);
+        if (!sub) return;
+
+        const full = sub.fullData;
+        let detailsHtml = `
+            <div class="detail-group"><span class="detail-label">Name:</span> <span class="detail-value">${full.name}</span></div>
+            <div class="detail-group"><span class="detail-label">Email:</span> <span class="detail-value">${full.email}</span></div>
+            <div class="detail-group"><span class="detail-label">Date Submitted:</span> <span class="detail-value">${new Date(full.dateSubmitted).toLocaleString()}</span></div>
+        `;
+
+        if (sub.type === 'review') {
+            detailsHtml += `<div class="detail-group"><span class="detail-label">Message:</span> <span class="detail-value">${full.message}</span></div>`;
+        } else if (sub.type === 'proposal') {
+            detailsHtml += `
+                <div class="detail-group"><span class="detail-label">Project Type:</span> <span class="detail-value">${full.projectType}</span></div>
+                <div class="detail-group"><span class="detail-label">Desired Start Date:</span> <span class="detail-value">${full.startDate}</span></div>
+                <div class="detail-group"><span class="detail-label">Budget:</span> <span class="detail-value">${full.budget}</span></div>
+                <div class="detail-group"><span class="detail-label">Description:</span> <span class="detail-value">${full.description}</span></div>
+            `;
+        }
+
+        document.getElementById('modalTitle').textContent = `${sub.type.charAt(0).toUpperCase() + sub.type.slice(1)} Submission #${sub.id}`;
+        document.getElementById('modalBody').innerHTML = detailsHtml;
+        document.getElementById('modalActions').innerHTML = `
+            <button class="approve-btn" onclick="updateStatus(${sub.id}, 'approved')">Approve</button>
+            <button class="deny-btn" onclick="updateStatus(${sub.id}, 'denied')">Deny</button>
+        `;
+        modal.classList.add('show');
+    }
+
+    function closeModal() {
+        modal.classList.remove('show');
+    }
+
+    function updateStatus(id, status) {
+        const sub = allSubmissions.find(s => s.id === id);
+        if (!sub) return;
+        sub.status = status;
+        updateStats();
+        filterSubmissions(); // Re-render with filters applied
+        closeModal();
+    }
+
+    // --- LOGOUT ---
+    logoutButton.addEventListener('click', async () => {
+        const response = await fetch('/api/logout', { method: 'POST' });
+        const result = await response.json();
+        if (result.success) window.location.href = '/';
+    });
+
+    // --- INITIALIZATION ---
+    searchBox.addEventListener('input', filterSubmissions);
+    typeFilter.addEventListener('change', filterSubmissions);
+    statusFilter.addEventListener('change', filterSubmissions);
+    
+    // Fetch submissions when the page loads
+    fetchSubmissions();
+</script>
+</body>
+</html>

@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <title>Login — Simple Page</title>
-<link rel="stylesheet" href="/style.css">
+<link rel="stylesheet" href="style.css">
 <style>
 
 body {
@@ -121,7 +121,47 @@ type="checkbox" /> Remember me</label>
 	<button class="btn" id="submitBtn" type="submit">Sign in</button>
 </div>
 </form>
-<footer>Don't have an account? <a href="#">Create one</a></footer>
+
 </main>
+
+<script>
+// --- THIS IS THE CORRECT WAY TO SEND JSON ---
+// Get a reference to your login form
+const loginForm = document.getElementById('loginForm');
+
+loginForm.addEventListener('submit', async (event) => {
+    event.preventDefault(); // Prevent the default form submission
+
+    // Get the values from the input fields
+    // --- FIND THIS CODE ---
+const username = loginForm.querySelector('#username').value;
+const password = loginForm.querySelector('#password').value;
+
+    // Create the JSON object
+    const data = {
+        username: username,
+        password: password
+    };
+
+    // Send the request with the correct headers and body
+    const response = await fetch('/api/login', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json' // <-- THIS IS THE CRITICAL HEADER
+        },
+        body: JSON.stringify(data) // <-- THIS CONVERTS YOUR DATA TO A JSON STRING
+    });
+
+    const result = await response.json();
+
+    if (result.success) {
+        // Redirect to the dashboard on successful login
+        window.location.href = '/dashboard.html';
+    } else {
+        // Show an error message
+        alert(result.message);
+    }
+});
+</script>
 </body>
 </html>
