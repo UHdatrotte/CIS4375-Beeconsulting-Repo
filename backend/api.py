@@ -11,7 +11,8 @@ import creds
 
 # ==================== DATABASE SETUP ====================
 myCreds = creds.Creds()
-connection = create_connection(myCreds.conString, myCreds.userName, myCreds.password, myCreds.dbName, charset='utf8mb4')
+def get_connection():
+    return create_connection(myCreds.conString,myCreds.userName,myCreds.password,myCreds.dbName,charset='utf8mb4')  # Create a helper function that creates a new one every time a request comes in.
 
 # ==================== FLASK APP SETUP ====================
 app = Flask(
@@ -36,7 +37,8 @@ def login():
     if not username or not password:
         return jsonify({'success': False, 'message': 'Missing username or password'}), 400
     sql = "SELECT ADMIN_ID, ADMIN_USER, ADMIN_PASS_HASH FROM ADMIN WHERE ADMIN_USER=%s"
-    user_record = execute_read_query(connection, sql, (username,))
+    conn = get_connection() 
+    user_record = execute_read_query(conn, sql, (username,))
     if not user_record:
         return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
     stored_hash = user_record[0]['ADMIN_PASS_HASH'].strip()
@@ -59,7 +61,8 @@ def dashboard():
     if 'user' not in session:
         return jsonify({'error': 'Unauthorized access'}), 401
     sql = "SELECT * FROM PROJECT"
-    projects = execute_read_query(connection, sql)
+    conn = get_connection() 
+    projects = execute_read_query(conn, sql)
     return jsonify({'projects': projects})
 
 
@@ -90,7 +93,8 @@ def serve_static(filename):
 def project_all():
     # ... your project CRUD code is fine ...
     sql = "SELECT * FROM PROJECT"
-    projects = execute_read_query(connection, sql)
+    conn = get_connection() 
+    projects = execute_read_query(conn, sql)
     return jsonify(projects)
 
 # ... (POST, PUT, DELETE for /api/project are fine) ...
@@ -101,7 +105,8 @@ def project_all():
 def testimonial_all():
     # ... your testimonial CRUD code is fine ...
     sql = "SELECT * FROM TESTIMONIAL"
-    testimonials = execute_read_query(connection, sql)
+    conn = get_connection() 
+    testimonials = execute_read_query(conn, sql)
     return jsonify(testimonials)
 
 # ... (POST, PUT, DELETE for /api/testimonial are fine) ...
@@ -112,7 +117,8 @@ def testimonial_all():
 # THIS IS THE ONLY FUNCTION FOR GETTING ALL SUBMISSIONS FOR THE DASHBOARD
 @app.route('/api/submissions', methods=['GET'])
 def get_all_submissions():
-    cursor = connection.cursor(dictionary=True)
+    conn = get_connection() 
+    cursor = conn.cursor(dictionary=True)
     
     # Testimonials - Select the new SUBMITTED_AT column
     cursor.execute("""
@@ -139,6 +145,9 @@ def get_all_submissions():
     for p in projects:
         p['type'] = 'proposal'
         p['status'] = 'waiting'
+            
+    cursor.close()
+    conn.close()
     
     return jsonify(testimonials + projects)
 
@@ -147,6 +156,7 @@ def get_all_submissions():
 def add_submission():
     data = request.get_json()
     submission_type = data.get('type')
+    conn = get_connection()
     try:
         if submission_type == 'review':
             # --- FIX IS HERE ---
@@ -166,7 +176,7 @@ def add_submission():
                 return jsonify({'success': False, 'message': 'Missing required fields'}), 400
 
             sql = f"INSERT INTO TESTIMONIAL ({','.join(keys)}) VALUES ({','.join(['%s']*len(keys))})"
-            testimonial_id = execute_write_query(connection, sql, tuple(values))
+            testimonial_id = execute_write_query(conn, sql, tuple(values))
             return jsonify({'success': True, 'message': 'Review submitted successfully', 'id': testimonial_id})
 
         elif submission_type == 'proposal':
@@ -187,7 +197,7 @@ def add_submission():
                 data.get('proposal_marketing'), data.get('proposal_description')
             ]
             sql = f"INSERT INTO PROJECT ({','.join(keys)}) VALUES ({','.join(['%s']*len(keys))})"
-            project_id = execute_write_query(connection, sql, tuple(values))
+            project_id = execute_write_query(conn, sql, tuple(values))
             return jsonify({'success': True, 'message': 'Proposal submitted successfully', 'id': project_id})
         else:
             return jsonify({'success': False, 'message': 'Invalid submission type'}), 400
