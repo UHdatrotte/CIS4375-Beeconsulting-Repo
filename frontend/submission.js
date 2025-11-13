@@ -1,5 +1,6 @@
-
+// Execute script after DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
+
     const mainForm = document.getElementById('mainForm');
     const reviewSection = document.getElementById('reviewFormSection');
     const proposalSection = document.getElementById('proposalFormSection');
@@ -22,7 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (closePopupBtn) closePopupBtn.addEventListener('click', closePopup);
     if (overlay) overlay.addEventListener('click', closePopup);
 
-    // ---- Button ----
+// ---- Type selection button: Review ----
     selectReviewBtn.addEventListener('click', () => {
         currentType = 'review';
         reviewSection.classList.add('active');
@@ -34,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.disabled = false;
         submitBtn.textContent = 'Submit Review';
     });
-
+// ---- Type selection button: Proposal ----
     selectProposalBtn.addEventListener('click', () => {
         currentType = 'proposal';
         proposalSection.classList.add('active');
@@ -47,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.textContent = 'Submit Proposal';
     });
 
-    // ---- submit ----
+// ---- Main form submission handler ----
     mainForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -103,7 +104,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data)
             });
-
+            
+            // Get JSON response from server
             const result = await response.json();
             console.log('Server result:', result);
 
