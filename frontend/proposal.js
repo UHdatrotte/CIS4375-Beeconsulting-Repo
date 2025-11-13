@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Submitting complete proposal data:', data);
 
             try {
-                const response = await fetch('/api/submissions', {
+                const response = await fetch('http://127.0.0.1:5000/api/submissions', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
