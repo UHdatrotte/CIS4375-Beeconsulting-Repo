@@ -115,10 +115,10 @@ def testimonial_all():
 # ==================== PUBLIC SUBMISSIONS (THE CORRECTED SECTION) ====================
 @app.route('/api/submissions', methods=['GET'])
 def get_all_submissions():
-
     try:
         conn = get_connection()
         cur = conn.cursor(dictionary=True)
+
         cur.execute("""
             SELECT 
                 TESTIMONIAL_ID AS id,
@@ -130,6 +130,7 @@ def get_all_submissions():
             FROM TESTIMONIAL
         """)
         testimonials = cur.fetchall()
+
         cur.execute("""
             SELECT 
                 TESTIMONIAL_ID AS id,
@@ -173,6 +174,7 @@ def get_all_submissions():
             FROM PROJECT
         """)
         projects = cur.fetchall()
+
         cur.execute("""
             SELECT 
                 PROJECT_ID AS id,
@@ -211,6 +213,89 @@ def get_all_submissions():
             "message": "Server error in /api/submissions"
         }), 500
 
+# ==================== PUBLIC SUBMISSIONS (CREATE NEW SUBMISSION) ====================
+@app.route('/api/submissions', methods=['POST'])
+def add_submission():
+    try:
+        data = request.get_json() or {}
+        submission_type = data.get('type')
+
+        conn = get_connection()
+        cur = conn.cursor()
+
+        if submission_type == 'review':
+            sql = """
+                INSERT INTO TESTIMONIAL
+                    (FNAME, LNAME, COMPANY_NAME, EMAIL, REVIEW, RATING)
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """
+            vals = (
+                data.get('FNAME'),
+                data.get('LNAME'),
+                data.get('COMPANY_NAME'),
+                data.get('EMAIL'),
+                data.get('REVIEW'),
+                data.get('RATING'),
+            )
+            cur.execute(sql, vals)
+            conn.commit()
+            new_id = cur.lastrowid
+
+        elif submission_type == 'proposal':
+            sql = """
+                INSERT INTO PROJECT
+                    (CLIENT_FNAME, CLIENT_LNAME, COMPANY_NAME, CLIENT_EMAIL, CLIENT_PHONE,
+                     COMPANY_STREET, COMPANY_CITY, COMPANY_STATE, COMPANY_ZIP,
+                     POSITION_REQ,
+                     JOB_STREET, JOB_CITY, JOB_STATE, JOB_ZIP,
+                     CONTRACT_TYPE, START_DATE, DURATION, CONTRACT_RATE,
+                     MARKETING, PROJECT_DESCRIPTION)
+                VALUES
+                    (%s, %s, %s, %s, %s,
+                     %s, %s, %s, %s,
+                     %s,
+                     %s, %s, %s, %s,
+                     %s, %s, %s, %s,
+                     %s, %s)
+            """
+            vals = (
+                data.get('proposal_firstname'),
+                data.get('proposal_lastname'),
+                data.get('proposal_company'),
+                data.get('proposal_email'),
+                data.get('proposal_phone'),
+                data.get('proposal_company_street'),
+                data.get('proposal_company_city'),
+                data.get('proposal_company_state'),
+                data.get('proposal_company_zip'),
+                data.get('proposal_position'),
+                data.get('proposal_street'),
+                data.get('proposal_city'),
+                data.get('proposal_state'),
+                data.get('proposal_zip'),
+                data.get('proposal_type'),
+                data.get('proposal_start_date'),
+                data.get('proposal_timeline'),
+                data.get('proposal_budget'),
+                data.get('proposal_marketing'),
+                data.get('proposal_description'),
+            )
+            cur.execute(sql, vals)
+            conn.commit()
+            new_id = cur.lastrowid
+
+        else:
+            cur.close()
+            conn.close()
+            return jsonify({'success': False, 'message': 'Invalid submission type'}), 400
+
+        cur.close()
+        conn.close()
+        return jsonify({'success': True, 'id': new_id})
+
+    except Exception as e:
+        print("Error in add_submission:", e)
+        return jsonify({'success': False, 'message': 'Internal server error'}), 500
 
 
 # ==================== UPDATE STATUS + AUDIT ====================
