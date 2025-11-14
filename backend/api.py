@@ -113,98 +113,248 @@ def testimonial_all():
 
 
 # ==================== PUBLIC SUBMISSIONS (THE CORRECTED SECTION) ====================
-
-# THIS IS THE ONLY FUNCTION FOR GETTING ALL SUBMISSIONS FOR THE DASHBOARD
 @app.route('/api/submissions', methods=['GET'])
 def get_all_submissions():
-    conn = get_connection() 
-    cursor = conn.cursor(dictionary=True)
-    
-    # Testimonials - Select the new SUBMITTED_AT column
-    cursor.execute("""
-        SELECT 
-            TESTIMONIAL_ID AS id, CONCAT(FNAME,' ',LNAME) AS name, EMAIL AS email, 
-            COMPANY_NAME AS company, REVIEW AS message, SUBMITTED_AT AS dateSubmitted
-        FROM TESTIMONIAL
-    """)
-    testimonials = cursor.fetchall()
-    for t in testimonials:
-        t['type'] = 'review'
-        t['status'] = 'waiting'
-    
-    # Projects - Select the new SUBMITTED_AT column
-    cursor.execute("""
-        SELECT 
-            PROJECT_ID AS id, CONCAT(CLIENT_FNAME,' ',CLIENT_LNAME) AS name, CLIENT_EMAIL AS email, 
-            COMPANY_NAME AS company, POSITION_REQ AS title, CONTRACT_TYPE AS projectType, 
-            PROJECT_DESCRIPTION AS description, CONTRACT_RATE AS budget, START_DATE AS startDate, 
-            DURATION AS timeline, SUBMITTED_AT AS dateSubmitted
-        FROM PROJECT
-    """)
-    projects = cursor.fetchall()
-    for p in projects:
-        p['type'] = 'proposal'
-        p['status'] = 'waiting'
-            
-    cursor.close()
-    conn.close()
-    
-    return jsonify(testimonials + projects)
 
-# THIS IS THE ONLY FUNCTION FOR ADDING NEW SUBMISSIONS
-@app.route('/api/submissions', methods=['POST'])
-def add_submission():
-    data = request.get_json()
-    submission_type = data.get('type')
+    try:
+        conn = get_connection()
+        cur = conn.cursor(dictionary=True)
+        cur.execute("""
+            SELECT 
+                TESTIMONIAL_ID AS id,
+                CONCAT(FNAME, ' ', LNAME) AS name,
+                EMAIL AS email,
+                COMPANY_NAME AS company,
+                REVIEW AS message,
+                SUBMITTED_AT AS dateSubmitted
+            FROM TESTIMONIAL
+        """)
+        testimonials = cur.fetchall()
+        cur.execute("""
+            SELECT 
+                TESTIMONIAL_ID AS id,
+                ACTION_TYPE,
+                TIME_STAMP
+            FROM TESTIMONIAL_AUDIT
+            ORDER BY TIME_STAMP DESC
+        """)
+        t_audits = cur.fetchall()
+
+        latest_t_action = {}
+        for row in t_audits:
+            if row["id"] not in latest_t_action:
+                latest_t_action[row["id"]] = row["ACTION_TYPE"]
+
+        for t in testimonials:
+            action = latest_t_action.get(t["id"])
+            if action == "APPROVED":
+                status = "approved"
+            elif action == "DENIED":
+                status = "denied"
+            else:
+                status = "waiting"
+
+            t["type"] = "review"
+            t["status"] = status
+
+        cur.execute("""
+            SELECT
+                PROJECT_ID AS id,
+                CONCAT(CLIENT_FNAME, ' ', CLIENT_LNAME) AS name,
+                CLIENT_EMAIL AS email,
+                COMPANY_NAME AS company,
+                POSITION_REQ AS title,
+                CONTRACT_TYPE AS projectType,
+                PROJECT_DESCRIPTION AS description,
+                CONTRACT_RATE AS budget,
+                START_DATE AS startDate,
+                DURATION AS timeline,
+                SUBMITTED_AT AS dateSubmitted
+            FROM PROJECT
+        """)
+        projects = cur.fetchall()
+        cur.execute("""
+            SELECT 
+                PROJECT_ID AS id,
+                ACTION_TYPE,
+                TIME_STAMP
+            FROM PROJECT_AUDIT
+            ORDER BY TIME_STAMP DESC
+        """)
+        p_audits = cur.fetchall()
+
+        latest_p_action = {}
+        for row in p_audits:
+            if row["id"] not in latest_p_action:
+                latest_p_action[row["id"]] = row["ACTION_TYPE"]
+
+        for p in projects:
+            action = latest_p_action.get(p["id"])
+            if action == "APPROVED":
+                status = "approved"
+            elif action == "DENIED":
+                status = "denied"
+            else:
+                status = "waiting"
+
+            p["type"] = "proposal"
+            p["status"] = status
+
+        cur.close()
+        conn.close()
+        return jsonify(testimonials + projects)
+
+    except Exception as e:
+        print("Error in get_all_submissions:", e)
+        return jsonify({
+            "success": False,
+            "message": "Server error in /api/submissions"
+        }), 500
+
+
+
+# ==================== UPDATE STATUS + AUDIT ====================
+@app.route('/api/submissions/<int:submission_id>/status', methods=['POST'])
+def update_submission_status(submission_id):
+    if 'user' not in session:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    data = request.get_json() or {}
+
+    raw_action = data.get('action', '')
+    raw_type   = data.get('type', '')
+
+    action = raw_action.strip().lower()   
+    typ    = raw_type.strip().lower()     
+
+    print('DEBUG update_status:', data, '=> action=', action, 'type=', typ)
+
+    admin_id = session['user']['id']
+
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+
+        # ---- REVIEW (TESTIMONIAL) ----
+        if typ == 'review':
+            cursor.execute(
+                """
+                INSERT INTO TESTIMONIAL_AUDIT
+                    (TESTIMONIAL_ID, ADMIN_ID, TIME_STAMP, ACTION_TYPE)
+                VALUES (%s, %s, NOW(), %s)
+                """,
+                (submission_id, admin_id, action.upper())   # APPROVED / DENIED
+            )
+
+        # ---- PROPOSAL (PROJECT) ----
+        elif typ == 'proposal':
+            cursor.execute(
+                """
+                INSERT INTO PROJECT_AUDIT
+                    (PROJECT_ID, ADMIN_ID, TIME_STAMP, ACTION_TYPE)
+                VALUES (%s, %s, NOW(), %s)
+                """,
+                (submission_id, admin_id, action.upper())
+            )
+
+        else:
+            cursor.close()
+            conn.close()
+            return jsonify({
+                'success': False,
+                'message': f'Unknown type: {raw_type}'
+            }), 200
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return jsonify({'success': True, 'status': action})
+
+    except Exception as e:
+        print('Error updating submission status:', e)
+        return jsonify({
+            'success': False,
+            'message': 'Server error while updating status'
+        }), 500
+
+
+# ==================== ADMIN ACTION LOGGING HELPERS ====================
+
+def log_testimonial_action(admin_id, testimonial_id, action_type):
+    """Record administrator actions in the TESTIMONIAL_AUDIT table"""
     conn = get_connection()
+    sql = """
+        INSERT INTO TESTIMONIAL_AUDIT (TESTIMONIAL_ID, ADMIN_ID, ACTION_TYPE)
+        VALUES (%s, %s, %s)
+    """
+    execute_write_query(conn, sql, (testimonial_id, admin_id, action_type))
+    conn.close()
+
+
+def log_project_action(admin_id, project_id, action_type):
+    """Record administrator actions in the PROJECT_AUDIT table"""
+    conn = get_connection()
+    sql = """
+        INSERT INTO PROJECT_AUDIT (PROJECT_ID, ADMIN_ID, ACTION_TYPE)
+        VALUES (%s, %s, %s)
+    """
+    execute_write_query(conn, sql, (project_id, admin_id, action_type))
+    conn.close()
+
+# ==================== ADMIN ACTION ROUTES (APPROVE / DENY) ====================
+
+@app.route('/api/submissions/<int:submission_id>/approve', methods=['POST'])
+def approve_submission(submission_id):
+    """Approve reviews or project proposals and record them in the AUDIT table"""
+    if 'user' not in session:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    data = request.get_json() or {}
+    submission_type = data.get('type')  # 'review' or 'proposal'
+    admin_id = session['user']['id']
+
     try:
         if submission_type == 'review':
-            # --- FIX IS HERE ---
-            # Match the keys sent from the frontend JavaScript exactly.
-            keys = ['FNAME', 'LNAME', 'COMPANY_NAME', 'EMAIL', 'REVIEW', 'RATING']
-            values = [
-                data.get('FNAME'),          # Changed from 'firstname'
-                data.get('LNAME'),          # Changed from 'lastname'
-                data.get('COMPANY_NAME'),   # Changed from 'company'
-                data.get('EMAIL'),          # Changed from 'email'
-                data.get('REVIEW'),         # Changed from 'message'
-                data.get('RATING')          # Changed from 'rating'
-            ]
-            
-            # Check if any required fields are missing
-            if not all([data.get('FNAME'), data.get('LNAME'), data.get('EMAIL'), data.get('REVIEW'), data.get('RATING')]):
-                return jsonify({'success': False, 'message': 'Missing required fields'}), 400
-
-            sql = f"INSERT INTO TESTIMONIAL ({','.join(keys)}) VALUES ({','.join(['%s']*len(keys))})"
-            testimonial_id = execute_write_query(conn, sql, tuple(values))
-            return jsonify({'success': True, 'message': 'Review submitted successfully', 'id': testimonial_id})
-
+            # REVIEW Approval Record
+            log_testimonial_action(admin_id, submission_id, 'APPROVED')
         elif submission_type == 'proposal':
-            # (Your proposal logic seems okay, but double-check its keys as well)
-            keys = [
-                'CLIENT_FNAME', 'CLIENT_LNAME', 'COMPANY_NAME', 'CLIENT_EMAIL', 'CLIENT_PHONE',
-                'COMPANY_STREET', 'COMPANY_CITY', 'COMPANY_STATE', 'COMPANY_ZIP', 'POSITION_REQ',
-                'JOB_STREET', 'JOB_CITY', 'JOB_STATE', 'JOB_ZIP', 'CONTRACT_TYPE', 'START_DATE',
-                'DURATION', 'CONTRACT_RATE', 'MARKETING', 'PROJECT_DESCRIPTION'
-            ]
-            values = [
-                data.get('proposal_firstname'), data.get('proposal_lastname'), data.get('proposal_company'),
-                data.get('proposal_email'), data.get('proposal_phone'), data.get('proposal_company_street'),
-                data.get('proposal_company_city'), data.get('proposal_company_state'), data.get('proposal_company_zip'),
-                data.get('proposal_position'), data.get('proposal_street'), data.get('proposal_city'),
-                data.get('proposal_state'), data.get('proposal_zip'), data.get('proposal_type'),
-                data.get('proposal_start_date'), data.get('proposal_timeline'), data.get('proposal_budget'),
-                data.get('proposal_marketing'), data.get('proposal_description')
-            ]
-            sql = f"INSERT INTO PROJECT ({','.join(keys)}) VALUES ({','.join(['%s']*len(keys))})"
-            project_id = execute_write_query(conn, sql, tuple(values))
-            return jsonify({'success': True, 'message': 'Proposal submitted successfully', 'id': project_id})
+            # PROJECT Approval Record
+            log_project_action(admin_id, submission_id, 'APPROVED')
         else:
             return jsonify({'success': False, 'message': 'Invalid submission type'}), 400
+
+        return jsonify({'success': True})
     except Exception as e:
-        print(f"Error in add_submission: {e}")
-        return jsonify({'success': False, 'message': 'An internal server error occurred'}), 500
-# ... (Your Approve / Deny submission routes are fine) ...
+        print("Error in approve_submission:", e)
+        return jsonify({'success': False, 'message': 'Internal server error'}), 500
+
+
+@app.route('/api/submissions/<int:submission_id>/deny', methods=['POST'])
+def deny_submission(submission_id):
+    """Reject a review or project proposal and record it in the AUDIT table."""
+    if 'user' not in session:
+        return jsonify({'success': False, 'message': 'Unauthorized'}), 401
+
+    data = request.get_json() or {}
+    submission_type = data.get('type')  # 'review' or 'proposal'
+    admin_id = session['user']['id']
+
+    try:
+        if submission_type == 'review':
+            # REVIEW deny record
+            log_testimonial_action(admin_id, submission_id, 'DENIED')
+        elif submission_type == 'proposal':
+            # PROJECT deny record
+            log_project_action(admin_id, submission_id, 'DENIED')
+        else:
+            return jsonify({'success': False, 'message': 'Invalid submission type'}), 400
+
+        return jsonify({'success': True})
+    except Exception as e:
+        print("Error in deny_submission:", e)
+        return jsonify({'success': False, 'message': 'Internal server error'}), 500
+
 
 
 # ==================== RUN APPLICATION ====================
