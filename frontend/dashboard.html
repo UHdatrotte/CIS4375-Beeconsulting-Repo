@@ -565,9 +565,10 @@
         document.getElementById('modalTitle').textContent = `${sub.type.charAt(0).toUpperCase() + sub.type.slice(1)} Submission #${sub.id}`;
         document.getElementById('modalBody').innerHTML = detailsHtml;
         document.getElementById('modalActions').innerHTML = `
-            <button class="approve-btn" onclick="updateStatus(${sub.id}, 'approved')">Approve</button>
-            <button class="deny-btn" onclick="updateStatus(${sub.id}, 'denied')">Deny</button>
+            <button class="approve-btn" onclick="updateStatus(${sub.id}, 'approved', '${sub.type}')">Approve</button>
+            <button class="deny-btn" onclick="updateStatus(${sub.id}, 'denied', '${sub.type}')">Deny</button>
         `;
+
 
         modal.classList.add('show');
     }
@@ -576,31 +577,31 @@
         modal.classList.remove('show');
     }
 
-async function updateStatus(id, status) {
-    const sub = allSubmissions.find(s => s.id === id);
-    if (!sub) return;
-
-    const action = status === 'approved' ? 'APPROVED' : 'DENIED';
-    const normalizedType = sub.type === 'proposal' ? 'project' : sub.type;
+async function updateStatus(id, status, type) {
+    const sub = allSubmissions.find(s => s.id === id && s.type === type);
+    if (!sub) {
+        console.error('Submission not found for', id, type);
+        return;
+    }
 
     try {
         const resp = await fetch(`/api/submissions/${id}/status`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                action: action,
-                type: normalizedType     // review or project
+                action: status,   // 'approved' or 'denied'
+                type: sub.type    // 'review' or 'proposal'
             })
         });
 
         const result = await resp.json();
 
         if (!resp.ok || !result.success) {
-            alert(result.message || 'Server error');
+            alert(result.message || 'Server error while updating status');
             return;
         }
 
-        sub.status = status;   // 'approved' or 'denied'
+        sub.status = status;
         updateStats();
         filterSubmissions();
         closeModal();
@@ -610,6 +611,7 @@ async function updateStatus(id, status) {
         alert('Network error while updating status.');
     }
 }
+
 
     // --- LOGOUT ---
     logoutButton.addEventListener('click', async () => {
