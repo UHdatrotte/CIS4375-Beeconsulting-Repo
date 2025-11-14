@@ -125,6 +125,7 @@ type="checkbox" /> Remember me</label>
 </main>
 
 <script>
+    
 // --- THIS IS THE CORRECT WAY TO SEND JSON ---
 // Get a reference to your login form
 const loginForm = document.getElementById('loginForm');
@@ -144,7 +145,7 @@ const password = loginForm.querySelector('#password').value;
     };
 
     // Send the request with the correct headers and body
-    const response = await fetch('/api/login', {
+    const response = await fetch('http://127.0.0.1:5000/api/login', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json' // <-- THIS IS THE CRITICAL HEADER
