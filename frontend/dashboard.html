@@ -581,15 +581,21 @@ async function updateStatus(id, status) {
     if (!sub) return;
 
     const action = status === 'approved' ? 'APPROVED' : 'DENIED';
-    const normalizedType = sub.type === 'proposal' ? 'project' : sub.type;
+    // normalize the type to the values backend expects ('proposal', 'review', 'testimonial')
+    let normalizedType = (sub.type || '').toLowerCase();
+    if (normalizedType === 'project') normalizedType = 'proposal';
+    if (!['proposal', 'review', 'testimonial'].includes(normalizedType)) {
+        // fallback to proposal to avoid sending an unexpected type
+        normalizedType = 'proposal';
+    }
 
     try {
         const resp = await fetch(`/api/submissions/${id}/status`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
+                body: JSON.stringify({
                 action: action,
-                type: normalizedType     // review or project
+                type: normalizedType     // proposal | review | testimonial
             })
         });
 
@@ -600,10 +606,12 @@ async function updateStatus(id, status) {
             return;
         }
 
-        sub.status = status;   // 'approved' or 'denied'
-        updateStats();
-        filterSubmissions();
-        closeModal();
+    sub.status = status;   // 'approved' or 'denied'
+    updateStats();
+    filterSubmissions();
+    closeModal();
+    // Refresh from server to ensure status reflects audit table
+    fetchSubmissions();
 
     } catch (err) {
         console.error('Status update error:', err);

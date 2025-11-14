@@ -310,7 +310,7 @@ def update_submission_status(submission_id):
     raw_type   = data.get('type', '')
 
     action = raw_action.strip().lower()   
-    typ    = raw_type.strip().lower()     
+    typ = raw_type.strip().lower()     
 
     print('DEBUG update_status:', data, '=> action=', action, 'type=', typ)
 
@@ -380,7 +380,7 @@ def log_testimonial_action(admin_id, testimonial_id, action_type):
 def log_project_action(admin_id, project_id, action_type):
     """Record administrator actions in the PROJECT_AUDIT table"""
     conn = get_connection()
-    sql = """
+    sql = """+
         INSERT INTO PROJECT_AUDIT (PROJECT_ID, ADMIN_ID, ACTION_TYPE)
         VALUES (%s, %s, %s)
     """
